@@ -1,3 +1,5 @@
-export {
-  start: () => {console.log('hello, world!'); }
+export {start}
+
+function start() {
+  console.log('hello, world!');
 }
