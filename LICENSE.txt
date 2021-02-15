@@ -1,0 +1,9 @@
+Unless otherwise noted, Copyright (c) Eric Dobbs and other contributors.
+
+Exact history of voluntary contributions will be available at
+https://github.com/dobbs/wiki-21
+
+In general we prefer MIT license for code and CC BY-SA 4.0 license for
+content.
+
+See LICENSE.txt under sub-folders for details.
