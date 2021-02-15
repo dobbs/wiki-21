@@ -100,6 +100,11 @@ function start () {
   document.addEventListener('click', click)
 }
 
+// <wiki-wiki><!--custom styles: setup the spce for lineup and footer-->
+// <wiki-lineup></wiki-lineup>
+// <wiki-footer></wiki-footer>
+// </wiki-wiki>
+
 function wikiStyle(dom) {
   dom.classList.add("wiki-root")
   ensureStyleTag(dom).insertAdjacentHTML("beforeend", `
