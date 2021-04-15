@@ -4,6 +4,15 @@
 export { start }
 import {types, typesLoaded} from './types.js'
 
+// suggest layers:
+//   storage... sitemap & pages
+//   semantic layer--interprets the storage into something with
+//       meaning. includes computation
+
+// not-quite layer (interactions with authors and readers may need to
+// reach through layers):
+//   view slice--I/O via DOM and events
+
 const newpid = () => `panel-${Math.floor(Math.random()*1000000)}`
 let lineup = window.lineup = {
   panels: [],
