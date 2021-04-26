@@ -1,4 +1,4 @@
-export { reload, click, lineup }
+export { reload, click, lineup, reference, types }
 
 let origin = 'localhost'
 
@@ -38,8 +38,8 @@ function refresh(panel) {
 }
 
 function dynaload(type) {
-  let url = `/plugins/${type}.js`
-  return import(url).catch(err=>({emit:() => `<p>troubled ${type}</p>`}))
+  let url = `../plugins/wiki-client-type-${type}.js`
+  return import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
 }
 
 async function render(pane,panel) {
@@ -97,6 +97,17 @@ async function resolve(title, pid) {
     let page = {title,story:[],journal:[]}
     return newpanel({where:'ghost', slug, page})
   }
+}
+
+async function reference(site, slug, pid) {
+  let start = Date.now()
+  let page = await probe(site, slug)
+  let panel = newpanel({where:site, slug, page})
+  panel.stats.fetch = Date.now() - start
+  let hit = lineup.findIndex(panel => panel.pid == pid)
+  lineup.splice(hit+1,lineup.length, panel)
+  start = Date.now()
+  return refresh(panel).then(() => {panel.stats.refresh = Date.now() - start})
 }
 
 function probe(where, slug) {
