@@ -33,6 +33,6 @@ See [Functional Testing](http://ward.dojo.fed.wiki/view/functional-testing/small
 
 ► see TYPE plugin
 
-► drop SLUG(@SITE)
+► drop SLUG@SITE
 
 ► show lineup
