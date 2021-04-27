@@ -1,7 +1,7 @@
 // Test runner for headless federated wiki
 // Usage: deno run --allow-net --reload core/test.js
 
-import { reload, click, lineup } from './line.js'
+import { reload, click, lineup, reference, types } from './line.js'
 import * as Colors from 'https://deno.land/std/fmt/colors.ts'
 
 let origin = 'small.fed.wiki'
@@ -19,13 +19,16 @@ while(todo.length) {
   console.log(next)
   let m
   if (m = next.match(/^► see (\d+) panels?$/)) {
-    confirm(lineup.length == m[1])
-  } else if (m = next.match(/^► see (\w+) plugin?$/)) {
-    confirm(true)
+    confirm(lineup.length == m[1], lineup.length)
+  } else if (m = next.match(/^► see (\w+) plugin$/)) {
+    let plugin = types[m[1]]
+    confirm(plugin && !plugin.err, plugin && plugin.err)
   } else if (m = next.match(/^► show lineup?$/)) {
     panels()
   } else if (m = next.match(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
-    confirm(false)
+    await reference(m[2], m[1], lineup.slice(-1)[0].pid)
+    panes(1)
+    confirm(true)
   } else {
     console.log(Colors.yellow("unknown"))
   }
@@ -41,8 +44,10 @@ function queue(page) {
   }
 }
 
-function confirm(boolean) {
-  console.log(boolean ? Colors.green('succeeds') : Colors.red('fails'))
+function confirm(boolean, actual) {
+  console.log(boolean ?
+    Colors.green('succeeds') :
+    Colors.red('fails') + ` with ${actual}`)
 }
 
 
