@@ -1,5 +1,6 @@
 // Test runner for headless federated wiki
-// Usage: deno run --allow-net --allow-read --reload core/test.js
+// Usage: deno run --allow-net --allow-read --reload core/test.js slug@site
+// Usage: deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js  slug@site
 
 import { reload, click, lineup, reference, types } from './line.js'
 import * as Colors from 'https://deno.land/std/fmt/colors.ts'
@@ -16,21 +17,30 @@ panels()
 panes(1)
 
 while(todo.length) {
-  let next = todo.shift()
+  let m, next = todo.shift()
+  const pragma = regex => { m = next.match(regex); return m }
   console.log(next)
-  let m
-  if (m = next.match(/^► see (\d+) panels?$/)) {
+
+  if (pragma(/^► see (\d+) panels?$/)) {
     confirm(lineup.length == m[1], lineup.length)
-  } else if (m = next.match(/^► see (\w+) plugin$/)) {
+  }
+
+  else if (pragma(/^► see (\w+) plugin$/)) {
     let plugin = types[m[1]]
     confirm(plugin && !plugin.err, plugin && plugin.err)
-  } else if (m = next.match(/^► show lineup?$/)) {
+  }
+
+  else if (pragma(/^► show lineup?$/)) {
     panels()
-  } else if (m = next.match(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
+  }
+
+  else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
     await reference(m[2], m[1], lineup.slice(-1)[0].pid)
     panes(1)
     confirm(true)
-  } else {
+  }
+
+  else {
     console.log(Colors.yellow("unknown"))
   }
 }
