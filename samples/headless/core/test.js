@@ -1,11 +1,12 @@
 // Test runner for headless federated wiki
-// Usage: deno run --allow-net --reload core/test.js
+// Usage: deno run --allow-net --allow-read --reload core/test.js
 
 import { reload, click, lineup, reference, types } from './line.js'
 import * as Colors from 'https://deno.land/std/fmt/colors.ts'
 
-let origin = 'small.fed.wiki'
-let hash = 'first-functional-test'
+let hash = Deno.args[0] || 'first-functional-test@small.fed.wiki'
+let origin = hash.split(/@/)[1] || 'small.fed.wiki'
+
 let todo = []
 
 await reload(origin, hash)
