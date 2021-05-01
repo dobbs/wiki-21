@@ -16,7 +16,7 @@ deno run --allow-net --allow-read --reload core/test.js
 
 ## Run from GitHub master
 
-Run any tests from anywhere.
+Run any tests from anywhere. Add desired slug@site as test.js argument.
 ```
 deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js
 ```
