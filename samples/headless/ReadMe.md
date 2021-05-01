@@ -18,7 +18,7 @@ deno run --allow-net --allow-read --reload core/test.js
 
 Run any tests from anywhere.
 ```
-deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js slug@site
+deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js
 ```
 
 # Pragmas Guide Testing
