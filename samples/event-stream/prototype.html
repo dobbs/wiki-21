@@ -1,0 +1,93 @@
+<head>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏁</text></svg>">
+</head>
+
+<style>
+  body {font-family:helvetica,Arial,Sans; }
+  th { width: 100px; padding:6px; }
+  td { vertical-align:top; text-align:center; padding:6px; }
+</style>
+
+<table border="1" style="border-collapse:collapse; border-color:#ccc;" >
+  <tr><th>producer <input type=checkbox id=run checked></input><th>fast<th>slow
+  <tr><td id=p><td id=f><td id=s>
+</table>
+
+<script>
+
+
+  // E V E N T   S T R E A M
+
+  let stream = []
+  let handlers = []
+
+  push = (event) => { stream.push(event); notify(event) }
+  notify = (event) => { handlers.map(cb => cb.call(stream, event)) }
+
+  function open() {
+    let index = 0
+    let waiting = null
+
+    // Alert on new event available
+    handlers.push(event => {
+      if(waiting) {
+        let ready = waiting
+        waiting = null
+        ready(event)
+      }
+    })
+
+    // Promise next event when available
+    let next = () => {
+      if (index < stream.length) {
+        return stream[index++]
+      } else {
+        return new Promise((resolve, reject) => {
+          waiting = event => resolve(event)
+        })
+      } 
+    }
+
+    return next
+  }
+
+
+  // A P P L I C A T I O N S
+
+  const rand = mean => Math.floor(mean * (Math.random()+Math.random()))
+  const show = (td, event) => td.innerHTML += `${event}<br>`
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+  setInterval(producer, 1000)
+  fast()
+  slow()
+
+  function producer() {
+    if(run.checked) {
+      let event = rand(1000000)
+      push(event)
+      show(p, event)
+    }
+  }
+
+  async function fast() {
+    let next = open()
+    while(true) {
+      let event = await next()
+      show(f, event)
+      await sleep(rand(800))
+    }
+  }
+
+  async function slow() {
+    let next = open()
+    while(true) {
+      let event = await next()
+      show(s, event)
+      await sleep(rand(1400))
+    }
+  }
+
+
+
+</script>

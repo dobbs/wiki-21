@@ -30,7 +30,7 @@ while(todo.length) {
     confirm(plugin && !plugin.err, plugin && plugin.err)
   }
 
-  else if (pragma(/^► show lineup?$/)) {
+  else if (pragma(/^► show lineup$/)) {
     panels()
   }
 
