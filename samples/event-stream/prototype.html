@@ -21,7 +21,7 @@
 
 <script type=module>
 
-import {post, open} from './stream.js'
+import {post, open, register} from './stream.js'
 import {producer, consumer} from './apps.js'
 
 
@@ -35,7 +35,6 @@ import {producer, consumer} from './apps.js'
 
   // L O G G I N G
 
-  const logger = async () => { let next = open(); while (true) console.log(await next()) }
-  logger()
+  register(event => console.log(event))
 
 </script>
