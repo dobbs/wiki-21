@@ -43,7 +43,7 @@
         return stream[index++]
       } else {
         return new Promise((resolve, reject) => {
-          waiting = event => resolve(event)
+          waiting = event => { index++; resolve(event) }
         })
       } 
     }
@@ -75,7 +75,7 @@
     while(true) {
       let event = await next()
       show(f, event)
-      await sleep(rand(800))
+      await sleep(rand(1000))
     }
   }
 
@@ -84,7 +84,7 @@
     while(true) {
       let event = await next()
       show(s, event)
-      await sleep(rand(1400))
+      await sleep(rand(1500))
     }
   }
 
