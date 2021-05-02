@@ -1,4 +1,4 @@
-export {post, open}
+export {post, open, register}
 
   // E V E N T   S T R E A M
 
