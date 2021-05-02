@@ -47,7 +47,7 @@ while(todo.length) {
 
 function queue(page) {
   for (let item of page.story) {
-    for (let line of item.text.split(/\n/)) {
+    for (let line of (item.text||'').split(/\n/)) {
       if (line.match(/^►/)) {
         todo.push(line)
       }
