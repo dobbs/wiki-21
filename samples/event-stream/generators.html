@@ -1,0 +1,69 @@
+<!doctype html>
+<title>generator stream</title>
+<meta charset="utf-8">
+
+<style>
+ body {font-family:helvetica,Arial,Sans; }
+ table { border-collapse:collapse; border-color:#ccc; }
+ th { width: 120px; padding:6px; }
+ td { vertical-align:top; text-align:center; padding:6px; }
+</style>
+
+(click the headings. Producer publishes another event. Fast and Slow consume at their own pace.)
+<table border=1>
+  <tr>
+    <th id=pbutton>producer (<span id=pcount>0</span>)
+    <th id=fbutton>fast (<span id=fcount>0</span>)
+    <th id=sbutton>slow (<span id=scount>0</span>)
+  </tr>
+  <tr><td id=p><td id=f><td id=s></tr>
+</table>
+
+<script>
+ const stream = []
+ const random = genRandom(1000)
+ const fast = subscribe(stream)
+ const slow = subscribe(stream)
+
+ // this is the "publish" in the pub/sub pattern
+ pbutton.addEventListener("click", event => {
+   const {value} = random.next()
+   stream.push(value)
+   pcount.innerHTML = +pcount.innerHTML + 1
+   p.appendChild(document.createTextNode(`\n${value}`))
+   p.appendChild(document.createElement("br"))
+ })
+
+ fbutton.addEventListener("click", async event => {
+   fcount.innerHTML = +fcount.innerHTML + 1
+   const {value} = await fast.next()
+   f.appendChild(document.createTextNode(`\n${value}`))
+   f.appendChild(document.createElement("br"))
+ })
+
+ sbutton.addEventListener("click", async event => {
+   scount.innerHTML = +scount.innerHTML + 1
+   const {value} = await slow.next()
+   s.appendChild(document.createTextNode(`\n${value}`))
+   s.appendChild(document.createElement("br"))
+ })
+
+ function* genRandom(mean) {
+   while (true) {
+     yield Math.floor(mean * (Math.random()+Math.random()))
+   }
+ }
+
+ async function* subscribe(source) {
+   let i = 0
+   while (true) {
+     if (i < source.length) {
+       yield source[i++]
+     } else {
+       // poll twice a second to see if source.length has changed
+       await new Promise(resolve => setTimeout(resolve, 500))
+     }
+   }
+ }
+
+</script>
