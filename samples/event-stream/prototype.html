@@ -15,8 +15,8 @@
 </p>
 
 <table border="1" style="border-collapse:collapse; border-color:#ccc;" >
-  <tr><th>producer <input type=checkbox id=run checked></input><th>fast<th>slow
-  <tr><td id=p><td id=f><td id=s>
+  <tr><th>producer <input type=checkbox id=run checked></input><th>fast<th>med<th>slow
+  <tr><td id=p><td id=f><td id=m><td id=s>
 </table>
 
 <script>
@@ -27,15 +27,16 @@
   let stream = []
   let handlers = []
 
-  push = (event) => { stream.push(event); notify(event) }
-  notify = (event) => { handlers.map(cb => cb.call(stream, event)) }
+  post = event => { stream.push(event); notify(event) }
+  notify = event => { handlers.map(cb => cb.call(stream, event)) }
+  register = handler => { handlers.push(handler) }
 
   function open() {
     let index = 0
     let waiting = null
 
     // Alert on new event available
-    handlers.push(event => {
+    register(event => {
       if(waiting) {
         let ready = waiting
         waiting = null
@@ -48,7 +49,7 @@
       if (index < stream.length) {
         return stream[index++]
       } else {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           waiting = event => { index++; resolve(event) }
         })
       } 
@@ -65,32 +66,24 @@
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
   setInterval(producer, 1000)
-  fast()
-  slow()
+  consumer(f, 800)
+  consumer(m, 1000)
+  consumer(s, 1500)
 
   function producer() {
     if(run.checked) {
       let event = rand(1000000)
-      push(event)
+      post(event)
       show(p, event)
     }
   }
 
-  async function fast() {
+  async function consumer(td, ms) {
     let next = open()
     while(true) {
       let event = await next()
-      show(f, event)
-      await sleep(rand(1000))
-    }
-  }
-
-  async function slow() {
-    let next = open()
-    while(true) {
-      let event = await next()
-      show(s, event)
-      await sleep(rand(1500))
+      show(td, event)
+      await sleep(rand(ms))
     }
   }
 
