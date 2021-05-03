@@ -12,7 +12,7 @@ https://dobbs.github.io/wiki-21/samples/event-stream/prototype.html
 From clone.
 ```
 cd wiki-21/samples/event-stream
-deno run --allow-net --allow-read https://deno.land/std/http/file_server.ts
+deno run --allow-net --allow-read=. https://deno.land/std/http/file_server.ts
 ```
 ```
 http://localhost:4507/prototype.html
