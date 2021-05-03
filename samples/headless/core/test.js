@@ -36,8 +36,13 @@ while(todo.length) {
 
   else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
     await reference(m[2], m[1], lineup.slice(-1)[0].pid)
-    panes(1)
-    confirm(true)
+    let page = lineup.slice(-1)[0].page
+    if (!page.err) {
+      panes(1)
+      confirm(true)    
+    } else {
+      confirm(false, page.err)
+    }
   }
 
   else {
