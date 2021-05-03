@@ -113,8 +113,8 @@ async function reference(site, slug, pid) {
 function probe(where, slug) {
   let site = where == null ? origin : where
   return fetch(`http://${site}/${slug}.json`)
-    .then(res => res.ok ? res.json() : null)
-    .catch(err => null)
+    .then(res => res.ok ? res.json() : ({title:'Error',story:[],journal:[],err:res.statusText||'unknown-1'}))
+    .catch(err => ({title:'Error',story:[],journal:[],err:res.message||'unknown-2'}))
 }
 
 function linkmark() {
