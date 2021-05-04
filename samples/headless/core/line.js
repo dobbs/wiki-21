@@ -20,11 +20,17 @@ async function line() {
     let event = await next()
     switch (event.type) {
       case 'reload':
-        reload(event.org, event.hash); break
+        await reload(event.org, event.hash)
+        post({type:'reloaded'})
+        break
       case 'reference':
-        reference(event.site, event.slug, event.pid); break
+        await reference(event.site, event.slug, event.pid)
+        post({type:'referenced'})
+        break
       case 'click':
-        click(event.title, event.pid)
+        await click(event.title, event.pid)
+        post({type:'clicked'})
+        break
     }
   }
 }

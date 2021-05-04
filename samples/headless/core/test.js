@@ -2,6 +2,7 @@
 // Usage: deno run --allow-net --allow-read --reload core/test.js slug@site
 // Usage: deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js  slug@site
 
+let t0 = Date.now()
 console.log('starting test')
 
 import { lineup, types } from './line.js'
@@ -13,15 +14,22 @@ let origin = hash.split(/@/)[1] || 'small.fed.wiki'
 
 let todo = []
 
-register(event => console.log({event}))
+let nextstream = open()
+const waitfor = async want => { let event = await nextstream(); if(event.type != want) await waitfor(want)}
+
+register(event => console.log({time:Date.now()-t0, event}))
 post({type:'reload', origin, hash})
 
+await waitfor('reloaded')
 queue(lineup.slice(-1)[0].page)
 
 panels()
 panes(1)
 
+
 while(todo.length) {
+
+
   let m, next = todo.shift()
   const pragma = regex => { m = next.match(regex); return m }
   console.log(next)
@@ -44,6 +52,7 @@ while(todo.length) {
     let site = m[2]
     let pid = lineup.slice(-1)[0].pid
     post({type:'reference', site, slug, pid})
+    await waitfor('referenced')
     let page = lineup.slice(-1)[0].page
     if (!page.err) {
       panes(1)
