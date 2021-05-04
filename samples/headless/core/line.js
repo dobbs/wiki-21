@@ -1,4 +1,5 @@
-export { reload, click, lineup, reference, types }
+import { open, post } from './stream.js'
+export { lineup, types }
 
 let origin = 'localhost'
 
@@ -9,6 +10,24 @@ const purl = (site, slug) => site ? `http://${site}/${slug}.json` : `http://${or
 let lineup = []
 let types = {}
 let t0 = Date.now()
+
+console.log('starting line')
+line()
+
+async function line() {
+  let next = open()
+  while (true) {
+    let event = await next()
+    switch (event.type) {
+      case 'reload':
+        reload(event.org, event.hash); break
+      case 'reference':
+        reference(event.site, event.slug, event.pid); break
+      case 'click':
+        click(event.title, event.pid)
+    }
+  }
+}
 
 function reload(org, hash) {
   origin = org
