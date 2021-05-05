@@ -62,9 +62,12 @@ function refresh(panel) {
   return Promise.all(flight)
 }
 
-function dynaload(type) {
+async function dynaload(type) {
+  post({type:'dynaload', plugin:type})
   let url = `../plugins/wiki-client-type-${type}.js`
-  return import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
+  let plugin = await import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
+  post({type:'dynaloaded', plugin:type, err:plugin.err})
+  return plugin
 }
 
 async function render(pane,panel) {
@@ -127,6 +130,7 @@ async function resolve(title, pid) {
 async function reference(site, slug, pid) {
   let start = Date.now()
   let page = await probe(site, slug)
+  post({type:'progress',event:'reference', title:page.title, err:page.err})
   let panel = newpanel({where:site, slug, page})
   panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)
