@@ -1,4 +1,5 @@
-export { reload, click, lineup, reference, types }
+import { open, post } from './stream.js'
+export { lineup, types }
 
 let origin = 'localhost'
 
@@ -9,6 +10,30 @@ const purl = (site, slug) => site ? `http://${site}/${slug}.json` : `http://${or
 let lineup = []
 let types = {}
 let t0 = Date.now()
+
+console.log('starting line')
+line()
+
+async function line() {
+  let next = open()
+  while (true) {
+    let event = await next()
+    switch (event.type) {
+      case 'reload':
+        await reload(event.org, event.hash)
+        post({type:'reloaded'})
+        break
+      case 'reference':
+        await reference(event.site, event.slug, event.pid)
+        post({type:'referenced'})
+        break
+      case 'click':
+        await click(event.title, event.pid)
+        post({type:'clicked'})
+        break
+    }
+  }
+}
 
 function reload(org, hash) {
   origin = org
@@ -37,9 +62,12 @@ function refresh(panel) {
   return Promise.all(flight)
 }
 
-function dynaload(type) {
+async function dynaload(type) {
+  post({type:'dynaload', plugin:type})
   let url = `../plugins/wiki-client-type-${type}.js`
-  return import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
+  let plugin = await import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
+  post({type:'dynaloaded', plugin:type, err:plugin.err})
+  return plugin
 }
 
 async function render(pane,panel) {
@@ -102,6 +130,7 @@ async function resolve(title, pid) {
 async function reference(site, slug, pid) {
   let start = Date.now()
   let page = await probe(site, slug)
+  post({type:'progress',event:'reference', title:page.title, err:page.err})
   let panel = newpanel({where:site, slug, page})
   panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)

@@ -2,7 +2,11 @@
 // Usage: deno run --allow-net --allow-read --reload core/test.js slug@site
 // Usage: deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js  slug@site
 
-import { reload, click, lineup, reference, types } from './line.js'
+let t0 = Date.now()
+console.log('starting test')
+
+import { lineup, types } from './line.js'
+import { post, open, register } from './stream.js'
 import * as Colors from 'https://deno.land/std/fmt/colors.ts'
 
 let hash = Deno.args[0] || 'first-functional-test@small.fed.wiki'
@@ -10,13 +14,22 @@ let origin = hash.split(/@/)[1] || 'small.fed.wiki'
 
 let todo = []
 
-await reload(origin, hash)
+let nextstream = open()
+const waitfor = async want => { let event = await nextstream(); if(event.type != want) await waitfor(want)}
+
+register(event => console.log({time:Date.now()-t0, event}))
+post({type:'reload', origin, hash})
+
+await waitfor('reloaded')
 queue(lineup.slice(-1)[0].page)
 
 panels()
 panes(1)
 
+
 while(todo.length) {
+
+
   let m, next = todo.shift()
   const pragma = regex => { m = next.match(regex); return m }
   console.log(next)
@@ -35,7 +48,11 @@ while(todo.length) {
   }
 
   else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
-    await reference(m[2], m[1], lineup.slice(-1)[0].pid)
+    let slug = m[1]
+    let site = m[2]
+    let pid = lineup.slice(-1)[0].pid
+    post({type:'reference', site, slug, pid})
+    await waitfor('referenced')
     let page = lineup.slice(-1)[0].page
     if (!page.err) {
       panes(1)
