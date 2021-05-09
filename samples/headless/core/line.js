@@ -20,7 +20,7 @@ async function line() {
     let event = await next()
     switch (event.type) {
       case 'reload':
-        await reload(event.org, event.hash)
+        await reload(event.origin, event.hash)
         post({type:'reloaded'})
         break
       case 'reference':
@@ -35,12 +35,13 @@ async function line() {
   }
 }
 
-function reload(org, hash) {
-  origin = org
+function reload(origin, hash) {
   let fields = hash.replace(/(^[/#]+)|([/]+$)/g,'').split('/')
   let flight = []
   for (let field of fields) {
     let [slug,site] = field.split('@')
+    console.log({origin,hash,slug,site})
+    site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)
     flight.push(fetch(purl(site,slug)).then(res => res.json()).then(json => {panel.page = json; refresh(panel)}))

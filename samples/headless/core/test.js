@@ -29,10 +29,21 @@ panes(1)
 
 while(todo.length) {
 
-
   let m, next = todo.shift()
   const pragma = regex => { m = next.match(regex); return m }
   console.log(next)
+  let failed = false
+  next = next.replace(/^► fail /, () => {failed = true; return '► '})
+
+
+  function confirm(boolean, actual) {
+    let report = boolean != failed ?
+      Colors.green('succeeds') :
+      Colors.red('fails')
+    if (!boolean) report += ` with ${actual}`
+    console.log(report)
+  }
+
 
   if (pragma(/^► see (\d+) panels?$/)) {
     confirm(lineup.length == m[1], lineup.length)
@@ -75,12 +86,6 @@ function queue(page) {
       }
     }
   }
-}
-
-function confirm(boolean, actual) {
-  console.log(boolean ?
-    Colors.green('succeeds') :
-    Colors.red('fails') + ` with ${actual}`)
 }
 
 
