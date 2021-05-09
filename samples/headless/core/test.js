@@ -21,8 +21,7 @@ register(event => console.log({time:Date.now()-t0, event}))
 post({type:'reload', origin, hash})
 
 await waitfor('reloaded')
-queue(lineup.slice(-1)[0].page)
-
+todo.push(...pragmas(lineup.slice(-1)[0].page))
 panels()
 panes(1)
 
@@ -95,7 +94,7 @@ while(todo.length) {
     let pid = lineup.slice(-1)[0].pid
     post({type:'reference', site, slug, pid})
     await waitfor('referenced')
-    queue(lineup.slice(-1)[0].page)
+    todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
   }
 
   else {
@@ -103,14 +102,16 @@ while(todo.length) {
   }
 }
 
-function queue(page) {
+function pragmas(page) {
+  let found = []
   for (let item of page.story) {
     for (let line of (item.text||'').split(/\n/)) {
       if (line.match(/^►/)) {
-        todo.push({line, item})
+        found.push({line, item})
       }
     }
   }
+  return found
 }
 
 
