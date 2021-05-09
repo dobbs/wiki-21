@@ -21,15 +21,18 @@ register(event => console.log({time:Date.now()-t0, event}))
 post({type:'reload', origin, hash})
 
 await waitfor('reloaded')
-queue(lineup.slice(-1)[0].page)
-
+todo.push(...pragmas(lineup.slice(-1)[0].page))
 panels()
 panes(1)
+
+const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
 
 
 while(todo.length) {
 
-  let m, next = todo.shift()
+  let m
+  let doing = todo.shift()
+  let next = doing.line
   const pragma = regex => { m = next.match(regex); return m }
   console.log(next)
   let failed = false
@@ -73,19 +76,42 @@ while(todo.length) {
     }
   }
 
+  else if (pragma(/^► run selected tests$/)) {
+    let item = doing.item
+    let selected = item.text
+      .split("\n")
+      .filter(line => /^- \[x\]/.test(line))
+      .map(line => {let m = line.match(/\[\[(.+?)\]\]/); return m[1]})
+    let moredo = selected.map(title => ({line: `► run [[${title}]]`, item}))
+    todo.splice(0,0,...moredo)
+  }
+
+  else if (pragma(/^► run \[\[(.+?)\]\]$/)) {
+    let title = m[1]
+    console.log(Colors.blue(`\n🀫 ${title}\n`))
+    let site = origin
+    let slug = asSlug(title)
+    let pid = lineup.slice(-1)[0].pid
+    post({type:'reference', site, slug, pid})
+    await waitfor('referenced')
+    todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
+  }
+
   else {
     console.log(Colors.yellow("unknown"))
   }
 }
 
-function queue(page) {
+function pragmas(page) {
+  let found = []
   for (let item of page.story) {
     for (let line of (item.text||'').split(/\n/)) {
       if (line.match(/^►/)) {
-        todo.push(line)
+        found.push({line, item})
       }
     }
   }
+  return found
 }
 
 
