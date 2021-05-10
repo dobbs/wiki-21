@@ -18,12 +18,13 @@ deno run --allow-net --allow-read --reload core/test.js
 
 Run any tests from anywhere. Add desired slug@site as test.js argument.
 ```
-deno run --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js
+deno run --reload --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js
 ```
 
 # Pragmas Guide Testing
 
 We add markup lines, typically to paragraphs, to guide the test runner and check the results it encocunters.
+Prepend any pragma with "fail" to indicate that failure is expected and will be marked as success.
 
 See [Functional Testing](http://ward.dojo.fed.wiki/view/functional-testing/small.fed.wiki/first-functional-test)
 
@@ -36,3 +37,8 @@ See [Functional Testing](http://ward.dojo.fed.wiki/view/functional-testing/small
 ► drop SLUG@SITE
 
 ► show lineup
+
+► run [[TITLE]]
+
+► run selected tests
+```
