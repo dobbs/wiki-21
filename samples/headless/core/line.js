@@ -20,7 +20,8 @@ async function line() {
     let event = await next()
     switch (event.type) {
       case 'reload':
-        await reload(event.origin, event.hash)
+        origin = event.origin || origin
+        await reload(event.hash)
         post({type:'reloaded'})
         break
       case 'reference':
@@ -35,7 +36,7 @@ async function line() {
   }
 }
 
-function reload(origin, hash) {
+function reload(hash) {
   let fields = hash.replace(/(^[/#]+)|([/]+$)/g,'').split('/')
   let flight = []
   for (let field of fields) {
@@ -115,15 +116,17 @@ async function resolve(title, pid) {
   const recent = (list, action) => {if (action.site && !list.includes(action.site)) list.push(action.site); return list}
   let panel = lineup.find(panel => panel.pid == pid)
   let path = (panel.page.journal||[]).reverse().reduce(recent,[origin, panel.where])
-  // console.log('resolve',{panel, path})
+  post({type:'progress', context: path })
   let slug = asSlug(title)
   let pages = await Promise.all(path.map(where => probe(where, slug)))
-  // console.log({path, pages})
-  let hit = pages.findIndex(page => page)
+  let hit = pages.findIndex(page => !page.err)
+  post({type:'progress', hit })
   if (hit >= 0) {
-    return newpanel({where:path[hit], slug, page:pages[hit]})
+    let site = path[hit]
+    return newpanel({where:site, site, slug, page:pages[hit]})
   } else {
-    let page = {title,story:[],journal:[]}
+    let text = "We can't find this page in the expected locations."
+    let page = {title,story:[{type:'paragraph', text}], journal:[], err:'not found where expected'}
     return newpanel({where:'ghost', slug, page})
   }
 }
@@ -132,7 +135,7 @@ async function reference(site, slug, pid) {
   let start = Date.now()
   let page = await probe(site, slug)
   post({type:'progress',event:'reference', title:page.title, err:page.err})
-  let panel = newpanel({where:site, slug, page})
+  let panel = newpanel({where:site, site, slug, page})
   panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)
   lineup.splice(hit+1,lineup.length, panel)
@@ -144,7 +147,7 @@ function probe(where, slug) {
   let site = where == null ? origin : where
   return fetch(`http://${site}/${slug}.json`)
     .then(res => res.ok ? res.json() : ({title:'Error',story:[],journal:[],err:res.statusText||'unknown-1'}))
-    .catch(err => ({title:'Error',story:[],journal:[],err:res.message||'unknown-2'}))
+    .catch(err => ({title:'Error',story:[],journal:[],err:err.message||'unknown-2'}))
 }
 
 function linkmark() {

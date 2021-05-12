@@ -17,7 +17,7 @@ let todo = []
 let nextstream = open()
 const waitfor = async want => { let event = await nextstream(); if(event.type != want) await waitfor(want)}
 
-register(event => console.log({time:Date.now()-t0, event}))
+register(event => console.log(Object.assign({time:Date.now()-t0}, event)))
 post({type:'reload', origin, hash})
 
 await waitfor('reloaded')
@@ -61,6 +61,10 @@ while(todo.length) {
     panels()
   }
 
+  else if (pragma(/^► show last panel/)) {
+    panes(1)
+  }
+
   else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {
     let slug = m[1]
     let site = m[2]
@@ -95,6 +99,22 @@ while(todo.length) {
     post({type:'reference', site, slug, pid})
     await waitfor('referenced')
     todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
+  }
+
+  else if (pragma(/^► click \[\[(.+?)\]\]$/)) {
+    let title = m[1]
+    let panel = lineup
+      .filter(panel => panel.panes
+        .filter(pane => !(/^►/.test(pane.item.text)))
+        .map(pane => pane.links)
+        .flat().includes(title))
+      .slice(-1)[0]
+    if (!panel) { console.log(Colors.yellow("absent")); continue }
+    let pid = panel.pid
+    post({type:'click', title, pid})
+    await waitfor('clicked')
+    let page = lineup.slice(-1)[0].page
+    confirm(!page.err, page.err)
   }
 
   else {
