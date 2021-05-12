@@ -101,7 +101,7 @@ while(todo.length) {
     todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
   }
 
-  else if (pragma(/^► click \[\[(.+?)\]\]$/)) {
+  else if (pragma(/^► click (.+?)$/)) {
     let title = m[1]
     let panel = lineup
       .filter(panel => panel.panes
