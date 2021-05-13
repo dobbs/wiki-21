@@ -9,7 +9,7 @@ import { lineup, types } from './line.js'
 import { post, open, register } from './stream.js'
 import * as Colors from 'https://deno.land/std/fmt/colors.ts'
 
-let hash = Deno.args[0] || 'first-functional-test@small.fed.wiki'
+let hash = Deno.args[0] || 'first-functional-test-suite@small.fed.wiki'
 let origin = hash.split(/@/)[1] || 'small.fed.wiki'
 
 let todo = []
@@ -34,6 +34,7 @@ while(todo.length) {
   let doing = todo.shift()
   let next = doing.line
   const pragma = regex => { m = next.match(regex); return m }
+  post({type:'progress',itemid:doing.item.id})
   console.log(next)
   let failed = false
   next = next.replace(/^► fail /, () => {failed = true; return '► '})
