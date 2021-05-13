@@ -11,14 +11,14 @@ Clone this repo and cd to samples/headless.
 
 Run the standard test suite.
 ```
-deno run --allow-net --allow-read --reload core/test.js
+deno run --allow-net --allow-read --reload ./testctl.js
 ```
 
 ## Run from GitHub master
 
 Run any tests from anywhere. Add desired slug@site as test.js argument.
 ```
-deno run --reload --allow-net https://dobbs.github.io/wiki-21/samples/headless/core/test.js
+deno run --reload --allow-net https://dobbs.github.io/wiki-21/samples/headless/testctl.js
 ```
 
 # Pragmas Guide Testing
