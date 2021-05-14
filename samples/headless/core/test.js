@@ -5,7 +5,7 @@ let t0 = Date.now()
 
 import { lineup, types } from './line.js'
 import { post, open, register } from './stream.js'
-import * as Colors from './vendor/colors.ts'
+import * as Colors from '../vendor/colors.ts'
 
 export async function start({origin, hash}) {
   console.log('starting test')
