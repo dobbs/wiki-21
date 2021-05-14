@@ -1,0 +1,23 @@
+<pre id=output></pre>
+
+<script type=module>
+
+  import { start } from "./core/test.js"
+  import { open } from "./core/stream.js"
+
+  let hash = 'first-functional-test-suite@small.fed.wiki'
+  let origin = hash.split(/@/)[1] || 'small.fed.wiki'
+
+  report()
+  start({origin, hash})
+
+  async function report() {
+    let next = open()
+    while(true) {
+      let event = await next()
+      let text = JSON.stringify(event, null, 2)
+      output.innerText += text.replace(/\033\[\d+m/g,'')
+    }
+  }
+
+</script>
