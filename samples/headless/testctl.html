@@ -16,7 +16,7 @@
     while(true) {
       let event = await next()
       let text = JSON.stringify(event, null, 2)
-      output.innerText += text
+      output.innerText += text.replace(/\033\[\d+m/g,'')
     }
   }
 
