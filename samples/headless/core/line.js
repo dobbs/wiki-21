@@ -39,13 +39,20 @@ async function line() {
 function reload(hash) {
   let fields = hash.replace(/(^[/#]+)|([/]+$)/g,'').split('/')
   let flight = []
+  let start = Date.now()
   for (let field of fields) {
     let [slug,site] = field.split('@')
     console.log({origin,hash,slug,site})
     site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)
-    flight.push(fetch(purl(site,slug)).then(res => res.json()).then(json => {panel.page = json; refresh(panel)}))
+    flight.push(fetch(purl(site,slug)).then(res => res.json())
+      .then(json => {
+        panel.page = json
+        refresh(panel)
+          .then(() => {panel.stats.refresh = Date.now() - start})
+      }
+     ))
   }
   return Promise.all(flight)
 }
@@ -57,7 +64,7 @@ function refresh(panel) {
   for (let item of panel.page.story) {
     let id = item.id
     let type = item.type
-    let pane = {id, type, item, links:[]}
+    let pane = {id, type, item, look:'blank', links:[]}
     panel.panes.push(pane)
     flight.push(render(pane,panel))
   }
@@ -67,7 +74,7 @@ function refresh(panel) {
 async function dynaload(type) {
   post({type:'dynaload', plugin:type})
   let url = `../plugins/wiki-client-type-${type}.js`
-  let plugin = await import(url).catch(err=>({err, emit:() => `<p>troubled ${type}</p>`}))
+  let plugin = await import(url).catch(err=>({err, emit:(pane,item) => pane.look = `<p>HELP ${item.text}</p>`}))
   post({type:'dynaloaded', plugin:type, err:plugin.err})
   return plugin
 }
@@ -85,7 +92,7 @@ async function render(pane,panel) {
     let handler = types[item.type] || await dynaload(item.type)
     if (handler) {
       types[item.type] = handler
-      pane.look = handler.emit(null, item)
+      handler.emit(pane, item)
       pane.dt = Date.now() - t0
     }
   }

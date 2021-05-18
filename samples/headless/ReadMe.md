@@ -30,13 +30,15 @@ See [Functional Testing](http://ward.dojo.fed.wiki/view/functional-testing/small
 
 ## Available Pragmas
 
+► show lineup
+
 ► see COUNT panel(s)
+
+► show COUNT panel(s)
 
 ► see TYPE plugin
 
 ► drop SLUG@SITE
-
-► show lineup
 
 ► run [[TITLE]]
 

@@ -24,8 +24,10 @@ function emit($item, item) {
   let code = `<code>${text}</code>`
   let html = `<pre style="background-color: #eee; padding:8px;">${code}</pre>`
 
-  if($item)
+  if($item && $item.innerHTML)
     $item.innerHTML = html
+  else if ($item && $item.look)
+    $item.look = html
   else
     return html
 }

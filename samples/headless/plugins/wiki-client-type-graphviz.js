@@ -41,8 +41,10 @@ function wrapSVG(url, svg) {
 
 function emit($item, item) {
   let html = (typeof document !== 'undefined') && item.svg ? wrapSVG(null, item.svg) : ''
-  if($item)
+  if($item && $item.innerHTML)
     $item.innerHTML = html
+  else if ($item && $item.look)
+    $item.look = html
   else
     return html
 }
