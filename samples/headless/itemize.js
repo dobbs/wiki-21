@@ -9,7 +9,7 @@ let page = {title, story, journal}
 let exprt = {'test-log': page}
 
 let log = Deno.readTextFileSync('test.log')
-let chunks = log.split(/\{.*?itemid:/)
+let chunks = log.split(/\{.*?run:/)
 for (let chunk of chunks) {
   let lines = chunk.split(/\r?\n/)
   let m = lines[0].match(/"([0-9a-f]+)"/)

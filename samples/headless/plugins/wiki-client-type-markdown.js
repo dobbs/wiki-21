@@ -22,8 +22,10 @@ function expand(line) {
 
 function emit($item, item) {
   let html = item.text.split(/\r?\n/).map(line => expand(escape(line))).join("\n")
-  if($item)
+  if($item && $item.innerHTML)
     $item.innerHTML = html
+  else if ($item && $item.look)
+    $item.look = html
   else
     return html
 }

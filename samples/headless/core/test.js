@@ -29,7 +29,7 @@ export async function start({origin, hash}) {
     let doing = todo.shift()
     let next = doing.line
     const pragma = regex => { m = next.match(regex); return m }
-    post({type:'progress',itemid:doing.item.id})
+    post({type:'progress',run:doing.item.id})
     console.log(next)
     let failed = false
     next = next.replace(/^► fail /, () => {failed = true; return '► '})
@@ -57,8 +57,8 @@ export async function start({origin, hash}) {
       panels()
     }
 
-    else if (pragma(/^► show last panel/)) {
-      panes(1)
+    else if (pragma(/^► show (\d+) panels?/)) {
+      panes(m[1])
     }
 
     else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {

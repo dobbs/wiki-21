@@ -19,8 +19,10 @@ function expand(text) {
 
 function emit($item, item) {
   let html = expand(escape(item.text))
-  if($item)
+  if($item && $item.innerHTML)
     $item.innerHTML = html
+  else if ($item && $item.look)
+    $item.look = html
   else
     return html
 }
