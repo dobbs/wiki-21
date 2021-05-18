@@ -1,13 +1,18 @@
+<meta charset="UTF-8">
 <pre id=output></pre>
 
 <script type=module>
 
+  // deno run --allow-read=. --allow-net https://deno.land/std/http/file_server.ts
+
   import { start } from "./core/test.js"
   import { open } from "./core/stream.js"
 
-  let hash = 'first-functional-test-suite@small.fed.wiki'
-  let origin = hash.split(/@/)[1] || 'small.fed.wiki'
+  const params = Object.fromEntries(new URLSearchParams(location.search).entries())
 
+  let hash = params['hash'] || 'first-functional-test-suite@small.fed.wiki'
+  let origin = hash.split(/@/)[1] || 'small.fed.wiki'
+  let t0 = Date.now()
   report()
   start({origin, hash})
 
@@ -15,8 +20,15 @@
     let next = open()
     while(true) {
       let event = await next()
-      let text = JSON.stringify(event, null, 2)
-      output.innerText += text.replace(/\033\[\d+m/g,'')
+      let json = JSON.stringify(Object.assign({time:Date.now()-t0}, event))
+        .replace(/"/g,'')
+        .replace(/,/g,', ')
+        .replace(/:/g, ': ')
+      if (event.type == 'progress') {
+        output.innerHTML += ` <span title="${json}"> •</span>`
+      } else {
+        output.innerHTML += "\n"+json
+      }
     }
   }
 
