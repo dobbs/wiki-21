@@ -11,7 +11,6 @@ let lineup = []
 let plugins = {}
 let t0 = Date.now()
 
-console.log('starting line')
 line()
 
 async function line() {
@@ -42,7 +41,7 @@ function reload(hash) {
   let start = Date.now()
   for (let field of fields) {
     let [slug,site] = field.split('@')
-    console.log({origin,hash,slug,site})
+    // console.log({origin,hash,slug,site})
     site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)

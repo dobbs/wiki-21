@@ -20,8 +20,7 @@ for (let chunk of chunks) {
     let summary = pragma.replace(/► /,'') + status(chunk)
     emit(summary, lines, m[1])
   } else {
-    console.log('loading')
-    emit('loading', lines, '3094509384980234')
+    console.log('prefix',lines)
   }
 }
 let json = JSON.stringify(exprt)
