@@ -7,21 +7,17 @@ import { lineup, plugins } from './line.js'
 import { post, open, register } from './stream.js'
 import * as Colors from '../vendor/colors.js'
 
-export async function start({origin, hash}) {
-  console.log('starting test')
-  register(event => console.log(Object.assign({time:Date.now()-t0}, event)))
-  post({type:'reload', origin, hash})
+register(event => console.log(Object.assign({time:Date.now()-t0}, event)))
 
-  let todo = []
+export async function start({origin, hash}) {
+
+  let line = `► reload ${hash}`
+  let item = {type:'paragraph', text:line, id:'a12b34c56d78e90f'}
+  let todo = [{line, item}]
 
   let nextstream = open()
 
   const waitfor = async want => { let event = await nextstream(); if(event.type != want) await waitfor(want)}
-
-  await waitfor('reloaded')
-  todo.push(...pragmas(lineup.slice(-1)[0].page))
-  panels()
-  panes(1)
 
   while(todo.length) {
 
@@ -59,6 +55,14 @@ export async function start({origin, hash}) {
 
     else if (pragma(/^► show (\d+) panels?/)) {
       panes(m[1])
+    }
+
+    else if (pragma(/^► reload (.+)$/)) {
+      let hash = m[1]
+      post({type:'reload', origin, hash})
+      await waitfor('reloaded')
+      confirm(lineup.length == 1, lineup.length)
+      todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
     }
 
     else if (pragma(/^► drop ([a-z-]+)@([a-zA-Z0-9\.]+)$/)) {

@@ -5,8 +5,6 @@ export {post, open, register}
   let stream = []
   let handlers = []
 
-  console.log('starting stream')
-
   const post = event => { stream.push(event); notify(event) }
   const notify = event => { handlers.map(cb => cb.call(stream, event)) }
   const register = handler => { handlers.push(handler) }
