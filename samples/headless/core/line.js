@@ -1,5 +1,5 @@
 import { open, post } from './stream.js'
-export { lineup, types }
+export { lineup, plugins }
 
 let origin = 'localhost'
 
@@ -8,7 +8,7 @@ const newpanel = (props) => ({pid:newpid(), stats:{}, ...props})
 const purl = (site, slug) => site ? `http://${site}/${slug}.json` : `http://${origin}/${slug}.json`
 
 let lineup = []
-let types = {}
+let plugins = {}
 let t0 = Date.now()
 
 console.log('starting line')
@@ -71,11 +71,19 @@ function refresh(panel) {
   return Promise.all(flight)
 }
 
-async function dynaload(type) {
-  post({type:'dynaload', plugin:type})
+let loading = {}
+async function load(type) {
+  let plugin = plugins[type]
+  if (plugin) return plugin
+  let queue = loading[type]
+  if (queue) return new Promise(resolve => queue.push(resolve))
+  queue = loading[type] = []
+  post({type:'load', plugin:type})
   let url = `../plugins/wiki-client-type-${type}.js`
-  let plugin = await import(url).catch(err=>({err, emit:(pane,item) => pane.look = `<p>HELP ${item.text}</p>`}))
-  post({type:'dynaloaded', plugin:type, err:plugin.err})
+  plugins[type] = plugin = await import(url).catch(err=>({err, emit:(pane,item) => pane.look = `<p>HELP ${item.text}</p>`}))
+  post({type:'loaded', plugin:type, queued:queue?.length, err:plugin.err})
+  if (queue?.length) queue.map(resolve => resolve(plugin))
+  delete loading[type]
   return plugin
 }
 
@@ -89,14 +97,10 @@ async function render(pane,panel) {
     pane.dt = Date.now() - t0
     return pane.look = `<p>${resolved}</p>`
   default:
-    let handler = types[item.type] || await dynaload(item.type)
-    if (handler) {
-      types[item.type] = handler
-      handler.emit(pane, item)
-      pane.dt = Date.now() - t0
-    }
+    let handler = await load(item.type)
+    handler.emit(pane, item)
+    pane.dt = Date.now() - t0
   }
-  return `<p style="background-color:#eee;">${item.type}</p>`
 
   function internal(link, title) {
     pane.links.push(title)

@@ -3,7 +3,7 @@
 
 let t0 = Date.now()
 
-import { lineup, types } from './line.js'
+import { lineup, plugins } from './line.js'
 import { post, open, register } from './stream.js'
 import * as Colors from '../vendor/colors.js'
 
@@ -49,7 +49,7 @@ export async function start({origin, hash}) {
     }
 
     else if (pragma(/^► see (\w+) plugin$/)) {
-      let plugin = types[m[1]]
+      let plugin = plugins[m[1]]
       confirm(plugin && !plugin.err, plugin && plugin.err)
     }
 
