@@ -28,7 +28,7 @@ async function line() {
         post({type:'referenced'})
         break
       case 'click':
-        await click(event.title, event.pid)
+        await click(event.title, event.pid, event.id)
         post({type:'clicked'})
         break
     }
@@ -79,7 +79,7 @@ async function load(type) {
   queue = loading[type] = []
   post({type:'load', plugin:type})
   let url = `../plugins/wiki-client-type-${type}.js`
-  plugins[type] = plugin = await import(url).catch(err=>({err, emit:(pane,item) => pane.look = `<p>HELP ${item.text}</p>`}))
+  plugins[type] = plugin = await import(url).catch(err=>({err:err.message, emit:(pane,item) => pane.look = `<p>HELP ${item.text}</p>`}))
   post({type:'loaded', plugin:type, queued:queue?.length, err:plugin.err})
   if (queue?.length) queue.map(resolve => resolve(plugin))
   delete loading[type]
@@ -111,9 +111,9 @@ async function render(pane,panel) {
   }
 }
 
-async function click(title, pid) {
+async function click(title, pid, id) {
   let start = Date.now()
-  let panel = await resolve(title, pid)
+  let panel = await resolve(title, pid, id)
   panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)
   lineup.splice(hit+1,lineup.length, panel)
@@ -121,11 +121,12 @@ async function click(title, pid) {
   return refresh(panel).then(() => {panel.stats.refresh = Date.now() - start})
 }
 
-async function resolve(title, pid) {
+async function resolve(title, pid, id) {
   const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
   const recent = (list, action) => {if (action.site && !list.includes(action.site)) list.push(action.site); return list}
   let panel = lineup.find(panel => panel.pid == pid)
-  let path = (panel.page.journal||[]).reverse().reduce(recent,[origin, panel.where])
+  let pane = panel.panes.find(pane => pane.item.id == id)
+  let path = (panel.page.journal||[]).reverse().reduce(recent,[origin, pane.context, panel.where])
   post({type:'progress', context: path })
   let slug = asSlug(title)
   let pages = await Promise.all(path.map(where => probe(where, slug)))

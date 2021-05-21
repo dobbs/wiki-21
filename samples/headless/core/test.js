@@ -57,6 +57,10 @@ export async function start({origin, hash}) {
       panes(m[1])
     }
 
+    else if (pragma(/^► show plugins/)) {
+      console.log(plugins)
+    }
+
     else if (pragma(/^► reload (.+)$/)) {
       let hash = m[1]
       post({type:'reload', origin, hash})
@@ -103,15 +107,14 @@ export async function start({origin, hash}) {
 
     else if (pragma(/^► click (.+?)$/)) {
       let title = m[1]
-      let panel = lineup
-          .filter(panel => panel.panes
-                  .filter(pane => !(/^►/.test(pane.item.text)))
-                  .map(pane => pane.links)
-                  .flat().includes(title))
-          .slice(-1)[0]
-      if (!panel) { console.log(Colors.yellow("absent")); continue }
-      let pid = panel.pid
-      post({type:'click', title, pid})
+      let maybe = []
+      for (let panel of lineup)
+        for (let pane of panel.panes)
+          if (!(/^►/.test(pane.item.text)) && pane.links.includes(title))
+            maybe.push({panel,pane})
+      if (!maybe.length) { console.log(Colors.yellow("absent")); continue }
+      let {panel, pane} = maybe.pop()
+      post({type:'click', title, pid:panel.pid, id:pane.item.id})
       await waitfor('clicked')
       let page = lineup.slice(-1)[0].page
       confirm(!page.err, page.err)
@@ -152,6 +155,7 @@ function panes(n) {
       dt:pane.dt,
       type:pane.type,
       look:(pane.look||'').replace(/<.*?>/g,'').slice(0,40),
-      links:pane.links})))
+      links:pane.links,
+      context:pane.context})))
   }
 }
