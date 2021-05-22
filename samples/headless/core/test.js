@@ -9,6 +9,7 @@ import * as Colors from '../vendor/colors.js'
 
 register(event => console.log(Object.assign({time:Date.now()-t0}, event)))
 
+export const counts = {succeeds:0, fails:0}
 export async function start({origin, hash}) {
 
   let line = `► reload ${hash}`
@@ -32,6 +33,8 @@ export async function start({origin, hash}) {
 
 
     function confirm(boolean, actual) {
+      if (boolean != failed) counts.succeeds++
+      else counts.fails++
       let report = boolean != failed ?
           Colors.green('succeeds') :
           Colors.red('fails')
@@ -112,7 +115,7 @@ export async function start({origin, hash}) {
         for (let pane of panel.panes)
           if (!(/^►/.test(pane.item.text)) && pane.links.includes(title))
             maybe.push({panel,pane})
-      if (!maybe.length) { console.log(Colors.yellow("absent")); continue }
+      if (!maybe.length) { confirm(false, 'absent'); continue }
       let {panel, pane} = maybe.pop()
       post({type:'click', title, pid:panel.pid, id:pane.item.id})
       await waitfor('clicked')
@@ -121,7 +124,7 @@ export async function start({origin, hash}) {
     }
 
     else {
-      console.log(Colors.yellow("unknown"))
+      confirm(false,'unknown')
     }
   }
 }
