@@ -30,7 +30,6 @@ console.log(file, json.length, 'bytes')
 
 function status(log) {
   if(/fails/.test(log)) return ' <span style="color:red">✘</span>'
-  if(/unknown|absent/.test(log)) return ' <span style="color:orange"><b>?</b></span>'
   if(/succeeds/.test(log)) return ' <span style="color:green">✔︎</span>'
   return ''
 }
