@@ -45,23 +45,30 @@ function reload(hash) {
     site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)
-    flight.push(fetch(purl(site,slug)).then(res => res.json())
+    let loading = fetch(purl(site,slug))
+      .then(res => res.json())
       .then(json => {
         panel.page = json
-        refresh(panel)
+        return refresh(panel)
           .then(() => {panel.stats.refresh = Date.now() - start})
       }
-     ))
+    )
+    flight.push(loading)
   }
   return Promise.all(flight)
 }
 
 function refresh(panel) {
+  post({type:'progress',panel:panel.pid})
   let flight = []
   panel.dt = Date.now() - t0
   panel.panes = []
   for (let item of panel.page.story) {
     let id = item.id
+    if (item.type == 'code' && item.text.startsWith('► be ')) {
+      item.type = item.text.match(/► be ([a-z]+)\b/)[1]
+      item.text = item.text.split(/\n/).splice(1).join("\n")
+    }
     let type = item.type
     let pane = {id, type, item, look:'blank', links:[]}
     panel.panes.push(pane)
