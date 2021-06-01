@@ -10,16 +10,18 @@ function escape(text) {
 }
 
 function emit($item, item) {
-  let text = item.text.split(/\r?\n/)
-    .map(line => escape(line))
-    .join("\n")
+  let nodes = item.text.split(/\r?\n/)
+  let text = nodes.map(line => escape(line)).join("\n")
   let code = `<code>${text}</code>`
   let html = `<pre style="background-color: #eee; padding:8px;">${code}</pre>`
 
   if($item && $item.innerHTML)
     $item.innerHTML = html
-  else if ($item && $item.look)
+  else if ($item && $item.look) {
     $item.look = html
+    $item.links.push('Strategy')
+    $item.links.push('Culture')
+  }
   else
     return html
 }
