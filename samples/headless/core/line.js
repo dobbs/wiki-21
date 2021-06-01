@@ -45,13 +45,15 @@ function reload(hash) {
     site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)
-    flight.push(fetch(purl(site,slug)).then(res => res.json())
+    let loading = fetch(purl(site,slug))
+      .then(res => res.json())
       .then(json => {
         panel.page = json
-        refresh(panel)
+        return refresh(panel)
           .then(() => {panel.stats.refresh = Date.now() - start})
       }
-     ))
+    )
+    flight.push(loading)
   }
   return Promise.all(flight)
 }
