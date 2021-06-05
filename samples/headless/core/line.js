@@ -9,7 +9,6 @@ const purl = (site, slug) => site ? `http://${site}/${slug}.json` : `http://${or
 
 let lineup = []
 let plugins = {}
-let t0 = Date.now()
 
 line()
 
@@ -38,10 +37,8 @@ async function line() {
 function reload(hash) {
   let fields = hash.replace(/(^[/#]+)|([/]+$)/g,'').split('/')
   let flight = []
-  let start = Date.now()
   for (let field of fields) {
     let [slug,site] = field.split('@')
-    // console.log({origin,hash,slug,site})
     site ||= origin
     let panel = newpanel({site, slug, where:site})
     lineup.push(panel)
@@ -50,7 +47,6 @@ function reload(hash) {
       .then(json => {
         panel.page = json
         return refresh(panel)
-          .then(() => {panel.stats.refresh = Date.now() - start})
       }
     )
     flight.push(loading)
@@ -61,7 +57,6 @@ function reload(hash) {
 function refresh(panel) {
   post({type:'progress',panel:panel.pid})
   let flight = []
-  panel.dt = Date.now() - t0
   panel.panes = []
   for (let item of panel.page.story) {
     let id = item.id
@@ -100,12 +95,10 @@ async function render(pane,panel) {
     let resolved = item.text
       .replace(/\[\[(.+?)\]\]/g, internal)
       .replace(/\[(.+?) (.+?)\]/g, external)
-    pane.dt = Date.now() - t0
     return pane.look = `<p>${resolved}</p>`
   default:
     let handler = await load(item.type)
     handler.emit(pane, item)
-    pane.dt = Date.now() - t0
   }
 
   function internal(link, title) {
@@ -119,13 +112,10 @@ async function render(pane,panel) {
 }
 
 async function click(title, pid, id) {
-  let start = Date.now()
   let panel = await resolve(title, pid, id)
-  panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)
   lineup.splice(hit+1,lineup.length, panel)
-  start = Date.now()
-  return refresh(panel).then(() => {panel.stats.refresh = Date.now() - start})
+  return refresh(panel)
 }
 
 async function resolve(title, pid, id) {
@@ -150,15 +140,12 @@ async function resolve(title, pid, id) {
 }
 
 async function reference(site, slug, pid) {
-  let start = Date.now()
   let page = await probe(site, slug)
   post({type:'progress',event:'reference', title:page.title, err:page.err})
   let panel = newpanel({where:site, site, slug, page})
-  panel.stats.fetch = Date.now() - start
   let hit = lineup.findIndex(panel => panel.pid == pid)
   lineup.splice(hit+1,lineup.length, panel)
-  start = Date.now()
-  return refresh(panel).then(() => {panel.stats.refresh = Date.now() - start})
+  return refresh(panel)
 }
 
 function probe(where, slug) {
