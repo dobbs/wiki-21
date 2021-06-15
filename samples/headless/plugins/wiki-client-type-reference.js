@@ -13,7 +13,6 @@ function emit($item, item) {
     $item.innerHTML = html
   else if ($item && $item.look) {
     $item.look = html
-    $item.links.push(item.title) 
     $item.context = item.site   
   }
   else

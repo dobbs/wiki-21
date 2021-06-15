@@ -49,7 +49,7 @@ export async function start({origin, hash}) {
 
     else if (pragma(/^► see (\w+) plugin$/)) {
       let plugin = plugins[m[1]]
-      if (!plugin || plugin.err) { confirm(false, plugin?.err); continute }
+      if (!plugin || plugin.err) { confirm(false, plugin?.err); continue }
       let pane = lastpane(pane => pane.item.type == m[1])
       confirm(pane!=null, 'absent')
     }
@@ -113,7 +113,7 @@ export async function start({origin, hash}) {
     else if (pragma(/^► click (.+?) in ([a-z]+)$/)) {
       let title = m[1]
       let pane = lastpane(pane => pane.item.type == m[2])
-      if (!pane) return confirm(false, 'absent')
+      if (!pane) { confirm(false, 'absent'); continue }
       post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
       await waitfor('clicked')
       let page = lineup.slice(-1)[0].page
@@ -122,14 +122,9 @@ export async function start({origin, hash}) {
 
     else if (pragma(/^► click (.+?)$/)) {
       let title = m[1]
-      let maybe = []
-      for (let panel of lineup)
-        for (let pane of panel.panes)
-          if (!(/^►/.test(pane.item.text)) && pane.links.includes(title))
-            maybe.push({panel,pane})
-      if (!maybe.length) { confirm(false, 'absent'); continue }
-      let {panel, pane} = maybe.pop()
-      post({type:'click', title, pid:panel.pid, id:pane.item.id})
+      let pane = lastpane(pane => (pane.item.text||'').includes(`[[${title}]]`))
+      if (!pane) { confirm(false, 'absent'); continue }
+      post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
       await waitfor('clicked')
       let page = lineup.slice(-1)[0].page
       confirm(!page.err, page.err)
@@ -177,7 +172,7 @@ function pragmas(page) {
 
 
 function panels() {
-  console.table(lineup.map(panel=>({pid:panel.pid, dt:panel.dt, site:panel.site, slug:panel.slug, where:panel.where})))
+  console.table(lineup.map(panel=>({pid:panel.pid, site:panel.site, slug:panel.slug, where:panel.where})))
 }
 
 function panes(n) {
@@ -185,10 +180,8 @@ function panes(n) {
     console.log(panel.page.title)
     console.table(panel.panes.map(pane=>({
       id:pane.id,
-      dt:pane.dt,
       type:pane.type,
-      look:(pane.look||'').replace(/<.*?>/g,'').slice(0,40),
-      links:pane.links,
-      context:pane.context})))
+      look:(pane.look||'').replace(/<.*?>/g,'').slice(0,40)
+    })))
   }
 }

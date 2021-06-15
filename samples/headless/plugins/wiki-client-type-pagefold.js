@@ -22,7 +22,7 @@ function emit($item, item) {
   if($item && $item.innerHTML)
     $item.innerHTML = html
   else if ($item && $item.look)
-    $item.look = html
+    $item.look = `--- ${item.text} ---`
   else
     return html
 }

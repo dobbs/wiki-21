@@ -69,7 +69,7 @@ function refresh(panel) {
       item.text = item.text.split(/\n/).splice(1).join("\n")
     }
     let type = item.type
-    let pane = {id, type, item, look:'blank', links:[], panel}
+    let pane = {id, type, item, look:'blank', panel}
     panel.panes.push(pane)
     flight.push(render(pane,panel))
   }
@@ -106,7 +106,6 @@ async function render(pane,panel) {
   }
 
   function internal(link, title) {
-    pane.links.push(title)
     return `<a href="#" data-pid=${panel.pid}>${title}</a>`
   }
 
