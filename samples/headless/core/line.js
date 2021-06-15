@@ -4,7 +4,7 @@ export { lineup, plugins }
 let origin = 'localhost'
 
 const newpid = () => Math.floor(Math.random()*1000000)
-const newpanel = (props) => ({pid:newpid(), stats:{}, ...props})
+const newpanel = (props) => ({pid:newpid(), lineup, ...props})
 const purl = (site, slug) => site ? `http://${site}/${slug}.json` : `http://${origin}/${slug}.json`
 
 let lineup = []
@@ -103,6 +103,7 @@ async function render(pane,panel) {
   default:
     let handler = await load(item.type)
     handler.emit(pane, item)
+    if(handler.bind) handler.bind(pane, item)
   }
 
   function internal(link, title) {
