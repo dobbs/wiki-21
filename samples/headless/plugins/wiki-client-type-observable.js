@@ -1,6 +1,6 @@
 // Smallest plugin for observable
 
-export { emit, bind }
+export { emit, bind, test }
 
 function escape(text) {
   return text
@@ -18,14 +18,31 @@ function emit($item, item) {
   if($item && $item.innerHTML)
     $item.innerHTML = html
   else if ($item && $item.look) {
+    $item.colors = nodes.reduce((acc, node) => (acc[node] = 'blue', acc), {})
     $item.look = html
-    $item.links.push('Strategy')
-    $item.links.push('Culture')
+    $item.source = 'sofi'
+    let colorMap = {good:'green',bad:'red'}
+    $item.setAssessment = (node, value) => {
+      $item.colors[node] = colorMap[value]||'blue'
+    }
   }
   else
     return html
 }
 
-function bind($item, item) {
+function bind(panel, item) {
 
+}
+
+function test(pane, pragma) {
+  // console.log(pane)
+  let m = pragma.match(/^see (red|green|blue)$/)
+  if (m) {
+    let success = Object.values(pane.colors).includes(m[1])
+    return {success, details:success?'ok':'absent'}
+  } else {
+    let success = false
+    let details = 'unknown'
+    return {success, details}
+  }
 }
