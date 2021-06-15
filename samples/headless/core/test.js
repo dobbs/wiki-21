@@ -18,7 +18,7 @@ export async function start({origin, hash}) {
 
   let nextstream = open()
 
-  const waitfor = async want => { let event = await nextstream(); if(event.type != want) await waitfor(want)}
+  const waitfor = async want => { let event = await nextstream(); if(event.type != want) return await waitfor(want); return event}
 
   while(todo.length) {
 
@@ -49,7 +49,9 @@ export async function start({origin, hash}) {
 
     else if (pragma(/^► see (\w+) plugin$/)) {
       let plugin = plugins[m[1]]
-      confirm(plugin && !plugin.err, plugin && plugin.err)
+      if (!plugin || plugin.err) { confirm(false, plugin?.err); continute }
+      let pane = lastpane(pane => pane.item.type == m[1])
+      confirm(pane!=null, 'absent')
     }
 
     else if (pragma(/^► show lineup$/)) {
@@ -108,6 +110,16 @@ export async function start({origin, hash}) {
       todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
     }
 
+    else if (pragma(/^► click (.+?) in ([a-z]+)$/)) {
+      let title = m[1]
+      let pane = lastpane(pane => pane.item.type == m[2])
+      if (!pane) return confirm(false, 'absent')
+      post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
+      await waitfor('clicked')
+      let page = lineup.slice(-1)[0].page
+      confirm(!page.err, page.err)
+    }
+
     else if (pragma(/^► click (.+?)$/)) {
       let title = m[1]
       let maybe = []
@@ -123,6 +135,15 @@ export async function start({origin, hash}) {
       confirm(!page.err, page.err)
     }
 
+    else if (pragma(/^► (.+?) in ([a-z]+)$/)) {
+      let pragma = m[1]
+      let pane = lastpane(pane => pane.item.type == m[2])
+      if (!pane) { confirm(false, 'absent'); continue }
+      post({type:'test', pragma, pid:pane.panel.pid, id:pane.item.id})
+      let result = await waitfor('tested')
+      confirm(result.success, result.details)
+    }
+
     else {
       confirm(false,'unknown')
     }
@@ -131,7 +152,16 @@ export async function start({origin, hash}) {
 
 const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
 
-
+function lastpane(predicate) {
+  for (let i = lineup.length-1; i >= 0; i--) {
+    let panel = lineup[i]
+    for (let j = panel.panes.length-1; j >=0; j--) {
+      let pane = panel.panes[j]
+      if (predicate(pane)) return pane
+    }
+  }
+  return null
+}
 
 function pragmas(page) {
   let found = []

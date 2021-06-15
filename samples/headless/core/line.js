@@ -30,6 +30,10 @@ async function line() {
         await click(event.title, event.pid, event.id)
         post({type:'clicked'})
         break
+      case 'test':
+        let result = await test(event.pragma, event.pid, event.id)
+        post({type:'tested', ...result})
+        break
     }
   }
 }
@@ -65,7 +69,7 @@ function refresh(panel) {
       item.text = item.text.split(/\n/).splice(1).join("\n")
     }
     let type = item.type
-    let pane = {id, type, item, look:'blank', links:[]}
+    let pane = {id, type, item, look:'blank', links:[], panel}
     panel.panes.push(pane)
     flight.push(render(pane,panel))
   }
@@ -153,6 +157,13 @@ function probe(where, slug) {
   return fetch(`http://${site}/${slug}.json`)
     .then(res => res.ok ? res.json() : ({title:'Error',story:[],journal:[],err:res.statusText||'unknown-1'}))
     .catch(err => ({title:'Error',story:[],journal:[],err:err.message||'unknown-2'}))
+}
+
+async function test(pragma, pid, id) {
+  let panel = lineup.find(panel => panel.pid == pid)
+  let pane = panel.panes.find(pane => pane.item.id == id)
+  let plugin = await load(pane.type)
+  return plugin.test(pane, pragma)
 }
 
 function linkmark() {

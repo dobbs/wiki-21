@@ -1,4 +1,4 @@
-// Smallest plugin for observable
+// Smallest plugin for assessment
 
 export { emit, bind, test }
 
