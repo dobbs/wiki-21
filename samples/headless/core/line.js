@@ -163,7 +163,7 @@ async function test(pragma, pid, id) {
   let panel = lineup.find(panel => panel.pid == pid)
   let pane = panel.panes.find(pane => pane.item.id == id)
   let plugin = await load(pane.type)
-  return plugin.test(pane, pragma)
+  return plugin.test(pane, pragma, {reference})
 }
 
 function linkmark() {

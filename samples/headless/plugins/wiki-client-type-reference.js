@@ -1,19 +1,21 @@
 // Smallest plugin for reference
 
-import { resolve } from '../core/plugin.js'
-export { emit, bind }
+export { emit, bind, test }
+const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
 
-function expand(text) {
-  return resolve(text, )
+function escape(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
 }
 
 function emit($item, item) {
-  let html = resolve(item?.text, $item.links||[])
+  let html = escape(item.text)
   if($item && $item.innerHTML)
     $item.innerHTML = html
   else if ($item && $item.look) {
     $item.look = html
-    $item.context = item.site   
   }
   else
     return html
@@ -21,4 +23,28 @@ function emit($item, item) {
 
 function bind($item, item) {
 
+}
+
+async function test(pane, pragma, line) {
+  let m
+
+  if (m = pragma.match(/^click (flag|twin title)$/)) {
+    let site = pane.item.site
+    let slug = asSlug(pane.item.title)
+    let pid = pane.panel.pid
+    let htmls = await line.reference(site, slug, pid)
+    let details = htmls[0]
+    // if we could tell where the htmls were fetched from
+    // then we could just for m[1]=='flag' ? site | origin
+    // instead we look for words expected on the desired page
+    let success = details.includes(m[1]=='flag' ? 'deploy' : 'uninteresting')
+    return {success, details:htmls[0]}
+  }
+
+  if (m = pragma.match(/^click (.+)$/)) {
+    let success = false
+    return {success, details:m[1]}
+  }
+
+  else return {success:false, details:'unknown'}
 }
