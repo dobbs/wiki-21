@@ -32,6 +32,12 @@ async function test(pane, pragma, line) {
     let site = pane.item.site
     let slug = asSlug(pane.item.title)
     let pid = pane.panel.pid
+    if (m[1]=='flag') {
+      let htmls = await line.reference(site, slug, pid)
+      let details = htmls[0]
+    } else {
+      // ... click()
+    }
     let htmls = await line.reference(site, slug, pid)
     let details = htmls[0]
     // if we could tell where the htmls were fetched from
