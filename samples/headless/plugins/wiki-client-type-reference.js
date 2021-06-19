@@ -45,4 +45,6 @@ async function test(pane, pragma, line) {
   }
 
   else return {success:false, details:'unknown'}
+
+  return {success:true}
 }
