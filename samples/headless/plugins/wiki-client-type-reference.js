@@ -26,30 +26,22 @@ function bind($item, item) {
 }
 
 async function test(pane, pragma, line) {
+  let item = pane.item
+  let pid = pane.panel.pid
   let m
 
-  if (m = pragma.match(/^click (flag|twin title)$/)) {
-    let site = pane.item.site
-    let slug = asSlug(pane.item.title)
-    let pid = pane.panel.pid
-    if (m[1]=='flag') {
-      let htmls = await line.reference(site, slug, pid)
-      let details = htmls[0]
-    } else {
-      // ... click()
-    }
-    let htmls = await line.reference(site, slug, pid)
-    let details = htmls[0]
-    // if we could tell where the htmls were fetched from
-    // then we could just for m[1]=='flag' ? site | origin
-    // instead we look for words expected on the desired page
-    let success = details.includes(m[1]=='flag' ? 'deploy' : 'uninteresting')
-    return {success, details:htmls[0]}
+  if (m = pragma.match(/^click flag$/)) {
+    let slug = asSlug(item.title)
+    await line.reference(item.site, asSlug(item.title), pid)
   }
 
-  if (m = pragma.match(/^click (.+)$/)) {
-    let success = false
-    return {success, details:m[1]}
+  else if (m = pragma.match(/^click title$/)) {
+    await line.click(item.title, pid, item.id)
+  }
+
+  // need some way to pass extra context for this to work
+  else if (m = pragma.match(/^click (.+)$/)) {
+    await line.click(m[1], pid, item.id)
   }
 
   else return {success:false, details:'unknown'}

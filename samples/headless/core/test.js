@@ -26,6 +26,7 @@ export async function start({origin, hash}) {
     let doing = todo.shift()
     let next = doing.line
     const pragma = regex => { m = next.match(regex); return m }
+    console.log()
     post({type:'progress',run:doing.item.id})
     console.log(next)
     let failed = false
@@ -38,7 +39,7 @@ export async function start({origin, hash}) {
       let report = boolean != failed ?
           Colors.green('succeeds') :
           Colors.red('fails')
-      if (!boolean) report += ` with ${actual}`
+      if (!boolean) {report += ` with ${actual}`}
       console.log(report)
     }
 
@@ -52,6 +53,12 @@ export async function start({origin, hash}) {
       if (!plugin || plugin.err) { confirm(false, plugin?.err); continue }
       let pane = lastpane(pane => pane.item.type == m[1])
       confirm(pane!=null, 'absent')
+    }
+
+    else if (pragma(/^► see synopsis (.+)$/)) {
+      let panel = lineup.slice(-1)[0]
+      let synopsis = panel.page.story[0].text
+      confirm(synopsis.includes(m[1]), synopsis.substring(0,60))
     }
 
     else if (pragma(/^► show lineup$/)) {
