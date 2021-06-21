@@ -130,7 +130,7 @@ export async function start({origin, hash}) {
       let title = m[1]
       let pane = lastpane(pane => (pane.item.text||'').includes(`[[${title}]]`))
       if (!pane) { confirm(false, 'absent'); continue }
-      post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
+      post({type:'click', title, pid:pane.panel.pid})
       await waitfor('clicked')
       let page = lineup.slice(-1)[0].page
       confirm(!page.err, page.err)

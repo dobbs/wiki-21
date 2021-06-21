@@ -45,7 +45,7 @@ async function test(pane, pragma, line) {
 
   if (m = pragma.match(/^click (.+)$/)) {
     if (!(pane.nodes.includes(m[1]))) return({success:false, detail:'absent'})
-    await line.click(m[1], pane.panel.pid, pane.item.id)
+    await line.click(m[1], pane.panel.pid)
 
     // let success = Object.values(pane.colors).includes(m[1])
     // return {success, details:success?'ok':'absent'}

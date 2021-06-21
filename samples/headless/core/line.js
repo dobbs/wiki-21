@@ -27,7 +27,7 @@ async function line() {
         post({type:'referenced'})
         break
       case 'click':
-        await click(event.title, event.pid, event.id)
+        await click(event.title, event.pid)
         post({type:'clicked'})
         break
       case 'test':
@@ -115,19 +115,18 @@ async function render(pane,panel) {
   }
 }
 
-async function click(title, pid, id) {
-  let panel = await resolve(title, pid, id)
+async function click(title, pid) {
+  let panel = await resolve(title, pid)
   let hit = lineup.findIndex(panel => panel.pid == pid)
   lineup.splice(hit+1,lineup.length, panel)
   return refresh(panel)
 }
 
-async function resolve(title, pid, id) {
+async function resolve(title, pid) {
   const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
   const recent = (list, action) => {if (action.site && !list.includes(action.site)) list.push(action.site); return list}
   let panel = lineup.find(panel => panel.pid == pid)
-  let pane = panel.panes.find(pane => pane.item.id == id)
-  let path = (panel.page.journal||[]).reverse().reduce(recent,[origin, pane.context, panel.where])
+  let path = (panel.page.journal||[]).reverse().reduce(recent,[origin, panel.where])
   post({type:'progress', context: path })
   let slug = asSlug(title)
   let pages = await Promise.all(path.map(where => probe(where, slug)))
