@@ -41,7 +41,7 @@ async function test(pane, pragma, line) {
 
   // need some way to pass extra context for this to work
   else if (m = pragma.match(/^click (.+)$/)) {
-    await line.click(m[1], pid)
+    await line.click(m[1], pid, [item.site])
   }
 
   else return {success:false, details:'unknown'}
