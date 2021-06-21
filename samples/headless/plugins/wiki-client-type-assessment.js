@@ -28,12 +28,15 @@ function bind(pane, item) {
 }
 
 function test(pane, pragma) {
+  let m
+  // maybe more like done in observable.js??
   let chooser = new RegExp(`^choose (${pane.choices.join("|")})$`)
-  let m = pragma.match(chooser)
-  if (m) {
+  if (m = pragma.match(chooser)) {
     if (pane.sofi != null) pane.sofi.setAssessment(pane.panel.page.title, m[1])
     return {success:true}
-  } else {
+  }
+
+  else {
     let success = false
     let details = 'unknown'
     return {success, details}

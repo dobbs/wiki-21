@@ -10,15 +10,15 @@ function escape(text) {
 }
 
 function emit($item, item) {
-  let nodes = item.text.split(/\r?\n/)
-  let text = nodes.map(line => escape(line)).join("\n")
+  $item.nodes = item.text.split(/\r?\n/)
+  let text = $item.nodes.map(line => escape(line)).join("\n")
   let code = `<code>${text}</code>`
   let html = `<pre style="background-color: #eee; padding:8px;">${code}</pre>`
 
   if($item && $item.innerHTML)
     $item.innerHTML = html
   else if ($item && $item.look) {
-    $item.colors = nodes.reduce((acc, node) => (acc[node] = 'blue', acc), {})
+    $item.colors = $item.nodes.reduce((acc, node) => (acc[node] = 'blue', acc), {})
     $item.look = html
     $item.source = 'sofi'
     let colorMap = {good:'green',bad:'red'}
@@ -34,13 +34,24 @@ function bind(panel, item) {
 
 }
 
-function test(pane, pragma) {
+async function test(pane, pragma, line) {
   // console.log(pane)
-  let m = pragma.match(/^see (red|green|blue)$/)
-  if (m) {
+  let m
+
+  if (m = pragma.match(/^see (red|green|blue)$/)) {
     let success = Object.values(pane.colors).includes(m[1])
     return {success, details:success?'ok':'absent'}
-  } else {
+  }
+
+  if (m = pragma.match(/^click (.+)$/)) {
+    if (!(pane.nodes.includes(m[1]))) return({success:false, detail:'absent'})
+    await line.click(m[1], pane.panel.pid)
+
+    // let success = Object.values(pane.colors).includes(m[1])
+    // return {success, details:success?'ok':'absent'}
+  }
+
+  else {
     let success = false
     let details = 'unknown'
     return {success, details}

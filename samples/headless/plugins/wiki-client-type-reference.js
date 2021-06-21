@@ -1,19 +1,21 @@
 // Smallest plugin for reference
 
-import { resolve } from '../core/plugin.js'
-export { emit, bind }
+export { emit, bind, test }
+const asSlug = (title) => title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase()
 
-function expand(text) {
-  return resolve(text, )
+function escape(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
 }
 
 function emit($item, item) {
-  let html = resolve(item?.text, $item.links||[])
+  let html = escape(item.text)
   if($item && $item.innerHTML)
     $item.innerHTML = html
   else if ($item && $item.look) {
     $item.look = html
-    $item.context = item.site   
   }
   else
     return html
@@ -21,4 +23,28 @@ function emit($item, item) {
 
 function bind($item, item) {
 
+}
+
+async function test(pane, pragma, line) {
+  let item = pane.item
+  let pid = pane.panel.pid
+  let m
+
+  if (m = pragma.match(/^click flag$/)) {
+    let slug = asSlug(item.title)
+    await line.reference(item.site, asSlug(item.title), pid)
+  }
+
+  else if (m = pragma.match(/^click title$/)) {
+    await line.click(item.title, pid)
+  }
+
+  // need some way to pass extra context for this to work
+  else if (m = pragma.match(/^click (.+)$/)) {
+    await line.click(m[1], pid, [item.site])
+  }
+
+  else return {success:false, details:'unknown'}
+
+  return {success:true}
 }

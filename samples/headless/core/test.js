@@ -26,6 +26,7 @@ export async function start({origin, hash}) {
     let doing = todo.shift()
     let next = doing.line
     const pragma = regex => { m = next.match(regex); return m }
+    console.log()
     post({type:'progress',run:doing.item.id})
     console.log(next)
     let failed = false
@@ -38,7 +39,7 @@ export async function start({origin, hash}) {
       let report = boolean != failed ?
           Colors.green('succeeds') :
           Colors.red('fails')
-      if (!boolean) report += ` with ${actual}`
+      if (!boolean) {report += ` with ${actual}`}
       console.log(report)
     }
 
@@ -52,6 +53,12 @@ export async function start({origin, hash}) {
       if (!plugin || plugin.err) { confirm(false, plugin?.err); continue }
       let pane = lastpane(pane => pane.item.type == m[1])
       confirm(pane!=null, 'absent')
+    }
+
+    else if (pragma(/^► see synopsis (.+)$/)) {
+      let panel = lineup.slice(-1)[0]
+      let synopsis = panel.page.story[0].text
+      confirm(synopsis.includes(m[1]), synopsis.substring(0,60))
     }
 
     else if (pragma(/^► show lineup$/)) {
@@ -110,26 +117,6 @@ export async function start({origin, hash}) {
       todo.splice(0,0,...pragmas(lineup.slice(-1)[0].page))
     }
 
-    else if (pragma(/^► click (.+?) in ([a-z]+)$/)) {
-      let title = m[1]
-      let pane = lastpane(pane => pane.item.type == m[2])
-      if (!pane) { confirm(false, 'absent'); continue }
-      post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
-      await waitfor('clicked')
-      let page = lineup.slice(-1)[0].page
-      confirm(!page.err, page.err)
-    }
-
-    else if (pragma(/^► click (.+?)$/)) {
-      let title = m[1]
-      let pane = lastpane(pane => (pane.item.text||'').includes(`[[${title}]]`))
-      if (!pane) { confirm(false, 'absent'); continue }
-      post({type:'click', title, pid:pane.panel.pid, id:pane.item.id})
-      await waitfor('clicked')
-      let page = lineup.slice(-1)[0].page
-      confirm(!page.err, page.err)
-    }
-
     else if (pragma(/^► (.+?) in ([a-z]+)$/)) {
       let pragma = m[1]
       let pane = lastpane(pane => pane.item.type == m[2])
@@ -137,6 +124,16 @@ export async function start({origin, hash}) {
       post({type:'test', pragma, pid:pane.panel.pid, id:pane.item.id})
       let result = await waitfor('tested')
       confirm(result.success, result.details)
+    }
+
+    else if (pragma(/^► click (.+?)$/)) {
+      let title = m[1]
+      let pane = lastpane(pane => (pane.item.text||'').includes(`[[${title}]]`))
+      if (!pane) { confirm(false, 'absent'); continue }
+      post({type:'click', title, pid:pane.panel.pid})
+      await waitfor('clicked')
+      let page = lineup.slice(-1)[0].page
+      confirm(!page.err, page.err)
     }
 
     else {
