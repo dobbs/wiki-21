@@ -4,45 +4,46 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Spike September 2021</title>
+    <link rel="stylesheet" href="./simple.min.css">
     <style>
      /*  box-sizing reset: https://css-tricks.com/box-sizing/  */
      html { box-sizing: border-box; }
      *, *:before, *:after { box-sizing: inherit; }
 
-     body {
-       --footer-height: 30pt;
-       font-family: "Helvetica Neue", Verdana, helvetica, Arial, Sans;
-       line-height: 1.3;
-       color: #333333;
+     html {
+       --footer-height: 3rem;
+       --panel-height: calc(100vh - var(--footer-height));
+       --panel-width: min(100vw /* for mobile */, 31rem);
      }
 
-     /*  footer & linup sizing and left-right scrolling  */
-     body, html {width: 100vw; height: 100vh; margin: 0; padding: 0;}
+     /* lineup positioning & scrolling behavior */
+     body {
+       padding: 0;
+       max-width: 100vw;
+       --base-fontsize: 1rem;
+     }
      main {
-       height: calc(100vh - var(--footer-height));
-       background-color: #eee;
-       overflow: auto hidden;
+       width: 100vw;
+       height: var(--panel-height);
+       display: flex;
+       overflow: scroll hidden;
      }
      footer {
-       position: fixed; bottom: 0;
-       width: 100vw; height: var(--footer-height);
-       padding: 10pt;
+       /* wiki footer colors, height, & padding */
        color: #eee; background-color: #555;
-       font-size: 80%;
-     }
-
-     /*  display panels in columns with independent vertical scrolling  */
-     main {
-       display: flex;
-       flex-direction: row;
+       height: var(--footer-height);
+       padding: 0.8rem;
+       font-size: .8rem;
+       /* override simplecss defaults */
+       margin-top: 0;
+       text-align: left;
+       border-top: 0;
      }
      article {
-       flex: 0 0 490px;
-       overflow: hidden auto;
-       margin: 4pt;
-       padding: 30px;
-       box-shadow: 2px 1px 4px rgba(0, 0, 0, 0.2);
-       background-color: white;
+       padding: 2rem;
+       flex: 0 0 var(--panel-width);
+       height: var(--panel-height);
+       overflow: hidden scroll;
      }
     </style>
   </head>
@@ -89,7 +90,7 @@
       </article>
     </main>
     <footer>
-      Site Owner: Spike
+      Author: Spike
     </footer>
 
   </body>
