@@ -14,6 +14,7 @@
        --footer-height: 3rem;
        --panel-height: calc(100vh - var(--footer-height));
        --panel-width: min(100vw /* for mobile */, 31rem);
+       min-height: -webkit-fill-available;
      }
 
      /* lineup positioning & scrolling behavior */
@@ -21,6 +22,8 @@
        padding: 0;
        max-width: 100vw;
        --base-fontsize: 1rem;
+       min-height: 100vh;
+       min-height: -webkit-fill-available;
      }
      main {
        width: 100vw;
@@ -32,6 +35,12 @@
      main::-webkit-scrollbar {
        height: 0;
      }
+     article {
+       padding: 2rem;
+       flex: 0 0 var(--panel-width);
+       height: 100%;
+       overflow: hidden scroll;
+     }
      footer {
        /* wiki footer colors, height, & padding */
        color: #eee; background-color: #555;
@@ -42,12 +51,6 @@
        margin-top: 0;
        text-align: left;
        border-top: 0;
-     }
-     article {
-       padding: 2rem;
-       flex: 0 0 var(--panel-width);
-       height: var(--panel-height);
-       overflow: hidden scroll;
      }
     </style>
   </head>
